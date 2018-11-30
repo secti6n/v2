@@ -1,0 +1,698 @@
+// Copyright (c) 2015 Vivaldi Technologies AS. All rights reserved.
+
+[
+  {
+    "namespace": "utilities",
+    "description": "Vivaldi general support api.",
+    "compiler_options": {
+      "implemented_in": "extensions/api/vivaldi_utilities/vivaldi_utilities_api.h"
+    },
+    "types": [
+      {
+        "id": "UrlValidResults",
+        "type": "object",
+        "description": "Object that describes the validitity of a given url.",
+        "properties": {
+          "urlValid": {
+            "type": "boolean",
+            "description": "The url is a correctly formatted url. This might be true even if the protocol is not valid."
+          },
+          "schemeValid": {
+            "type": "boolean",
+            "description": "The protocol scheme is known and one we can show directly."
+          }
+        }
+      },
+      {
+        "id": "FileExtension",
+        "type": "object",
+        "description": "A single extension item used for filtering ",
+        "properties": {
+          "ext": {
+            "type": "string",
+            "description": "Extension ending, eg. 'jpg'"
+          }
+        }
+      },
+      {
+        "id": "SharedDataValue",
+        "type": "object",
+        "description": "Data key+value pair.",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "The data key."
+          },
+          "value": {
+            "type": "any",
+            "description": "The data value."
+          }
+        }
+      },
+      {
+        "id": "DateFormats",
+        "type": "object",
+        "description": "An object containing various system date/time formats",
+        "properties": {
+          "shortDateFormat": {
+            "type": "string",
+            "minimum": 0,
+            "description": "Short date format."
+          },
+          "longDateFormat": {
+            "type": "string",
+            "minimum": 0,
+            "description": "Long date format."
+          },
+          "timeFormat": {
+            "type": "string",
+            "minimum": 0,
+            "description": "12/24 hour time format string"
+          },
+          "firstDayOfWeek": {
+            "type": "number",
+            "description": "The first day of the week. 0-6 (Sunday to Saturday)"
+          }
+        }
+      }
+    ],
+    "functions": [
+      {
+        "name": "basicPrint",
+        "type": "function",
+        "description": "Open basic print dialog",
+        "parameters": [
+        ]
+      },
+      {
+        "name": "clearAllRecentlyClosedSessions",
+        "type": "function",
+        "description": "Clears the list of recently closed tabs and/or windows.",
+        "parameters": [
+          {
+            "type": "function",
+            "name": "callback",
+            "optional": true,
+            "parameters": [
+              {
+                "type": "boolean",
+                "name": "result",
+                "description": "A boolean variable stating if removing recently closed tabs and/or windows call was successfull or not"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "getUniqueUserId",
+        "type": "function",
+        "description": "Obtains a unique identifier for the current user of the computer",
+        "parameters": [
+          {
+            "name": "legacyUserId",
+            "type": "string",
+            "description": "User Id obtained from the old implementation relying on local storage. It will be used if no other user id value is found."
+          },
+          {
+            "type": "function",
+            "name": "callback",
+            "parameters": [
+              {
+                "name": "uniqueUserId",
+                "type": "string",
+                "description": "The user id as a 16-char hex string."
+              },
+              {
+                "name": "isNewUser",
+                "type": "boolean",
+                "description": "Whether a new user id was created or a previous one was found."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "isTabInLastSession",
+        "type": "function",
+        "description": "Checks whether a given tab is part of the last loaded session",
+        "parameters": [
+          {
+            "name": "tabId",
+            "type": "string",
+            "description": "The tab id to check if part of the session"
+          },
+          {
+            "type": "function",
+            "name": "callback",
+            "parameters": [
+              {
+                "name": "isInSession",
+                "type": "boolean",
+                "description": "true if the given tabId is loaded from the session and has since not been navigated in, otherwise false."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "isUrlValid",
+        "type": "function",
+        "description": "Validates given URL. Returns UrlValidResults with the results.",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "The URL to validate",
+            "name": "url"
+          },
+          {
+            "type": "function",
+            "name": "callback",
+            "parameters": [
+              {
+                "name": "results",
+                "$ref": "UrlValidResults"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "getSelectedText",
+        "type": "function",
+        "description": "Returns selected text in page with given id",
+        "parameters": [
+          {
+            "name": "tabId",
+            "type": "string",
+            "description": "The page to examine"
+          },
+          {
+            "type": "function",
+            "name": "callback",
+            "parameters": [
+              {
+                "name": "text",
+                "type": "string"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "createUrlMapping",
+        "type": "function",
+        "description": "Creates a mapping to a local file so it can be accessed using the chrome://vivaldi-data/local-image/ protocol.",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "The local path to the image file.",
+            "name": "localPath"
+          },
+          {
+            "type": "function",
+            "name": "callback",
+            "parameters": [
+              {
+                "type": "string",
+                "description": "The generated url for the file using for accessing it as chrome://vivaldi-data/local-image/<id>",
+                "name": "generatedUrl"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "removeUrlMapping",
+        "type": "function",
+        "description": "Remove the given url mapping, if it exists.",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "The url mapping to remove.",
+            "name": "url"
+          },
+          {
+            "type": "function",
+            "name": "callback",
+            "parameters": [
+              {
+                "type": "boolean",
+                "description": "true if the given mapping was found and removed, otherwise false.",
+                "name": "success"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "selectFile",
+        "type": "function",
+        "description": "Select a single file and returns the file name.",
+        "parameters": [
+          {
+            "name": "accepts",
+            "type": "array",
+            "description": "Extensions to filter file names on.",
+            "optional": true,
+            "items": { "$ref": "FileExtension" }
+          },
+          {
+            "name": "title",
+            "type": "string",
+            "description": "Title of the file select dialog.",
+            "optional": true
+          },
+          {
+            "type": "function",
+            "name": "callback",
+            "parameters": [
+              {
+                "type": "string",
+                "description": "Full path to the selected file.",
+                "name": "path"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "getVersion",
+        "type": "function",
+        "description": "Gets the Vivaldi version and Chromium versions.",
+        "parameters": [
+          {
+            "type": "function",
+            "name": "callback",
+            "parameters": [
+              {
+                "name": "vivaldiVer",
+                "type": "string",
+                "description": "The Vivaldi version as a string."
+              },
+              {
+                "name": "chromiumVer",
+                "type": "string",
+                "description": "The Chromium version as a string."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "setSharedData",
+        "type": "function",
+        "description": "Sets the given data to be kept in-memory for the duration of the Vivaldi setting (until Vivaldi exits).",
+        "parameters": [
+          {
+            "name": "keyValuePair",
+            "$ref": "SharedDataValue",
+            "description": "The Key-value."
+          },
+          {
+            "type": "function",
+            "name": "callback",
+            "optional": true,
+            "parameters": [
+              {
+                "name": "newvalue",
+                "type": "boolean",
+                "description": "true if a new value was set, false if an existing value was updated."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "getSharedData",
+        "type": "function",
+        "description": "Gets the given data from the in-memory storage.",
+        "parameters": [
+          {
+            "name": "keyValuePair",
+            "$ref": "SharedDataValue",
+            "description": "The Key-value, the value is the default value returned if the key does not exist."
+          },
+          {
+            "type": "function",
+            "name": "callback",
+            "optional": true,
+            "parameters": [
+              {
+                "name": "value",
+                "type": "any",
+                "description": "Data value."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "getSystemDateFormat",
+        "type": "function",
+        "description": "Returns various date/time system formats",
+        "parameters": [
+          {
+            "type": "function",
+            "name": "callback",
+            "optional": true,
+            "parameters": [
+              {
+                "name": "result",
+                "$ref": "DateFormats"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "setLanguage",
+        "type": "function",
+        "description": "Sets the Vivaldi language code.",
+        "parameters": [
+          {
+            "name": "locale",
+            "type": "string"
+          },
+          {
+            "type": "function",
+            "name": "callback",
+            "description": "Return value true for success, false for failure.",
+            "parameters": [
+              {
+                "name": "result",
+                "type": "boolean"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "getLanguage",
+        "type": "function",
+        "description": "Gets the active Vivaldi language code.",
+        "parameters": [
+          {
+            "type": "function",
+            "name": "callback",
+            "description": "Return the language code.",
+            "parameters": [
+              {
+                "name": "langCode",
+                "type": "string"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "setVivaldiAsDefaultBrowser",
+        "type": "function",
+        "description": "Set Vivaldi as the default browser.",
+        "parameters": [
+          {
+            "type": "function",
+            "name": "callback",
+            "parameters": [
+              {
+                "name": "result",
+                "type": "string"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "isVivaldiDefaultBrowser",
+        "type": "function",
+        "description": "Is Vivaldi the default browser.",
+        "parameters": [
+          {
+            "type": "function",
+            "name": "callback",
+            "parameters": [
+              {
+                "name": "result",
+                "type": "string"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "launchNetworkSettings",
+        "type": "function",
+        "description": "Launch network settings.",
+        "parameters": [
+          {
+            "type": "function",
+            "name": "callback",
+            "parameters": [
+              {
+                "name": "result",
+                "type": "string"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "savePage",
+        "type": "function",
+        "description": "Saves web page.",
+        "parameters": [
+          {
+            "type": "function",
+            "name": "callback",
+            "parameters": [
+              {
+                "name": "result",
+                "type": "string"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "openPage",
+        "type": "function",
+        "description": "Open web page.",
+        "parameters": [
+          {
+            "type": "function",
+            "name": "callback",
+            "parameters": [
+              {
+                "name": "result",
+                "type": "string"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "setDefaultContentSettings",
+        "type": "function",
+        "description": "Set Vivaldi default content settings.",
+        "parameters": [
+          {
+            "name": "contentSetting",
+            "type": "string"
+          },
+          {
+            "name": "value",
+            "type": "string"
+          },
+          {
+            "type": "function",
+            "name": "callback",
+            "parameters": [
+              {
+                "name": "result",
+                "type": "string"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "getDefaultContentSettings",
+        "type": "function",
+        "description": "Set Vivaldi default content settings.",
+        "parameters": [
+          {
+            "name": "contentSetting",
+            "type": "string"
+          },
+          {
+            "type": "function",
+            "name": "callback",
+            "parameters": [
+              {
+                "name": "result",
+                "type": "string"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "setBlockThirdPartyCookies",
+        "type": "function",
+        "description": "Set Vivaldi default content settings.",
+        "parameters": [
+          {
+            "name": "block3rdParty",
+            "type": "boolean"
+          },
+          {
+            "type": "function",
+            "name": "callback",
+            "parameters": [
+              {
+                "name": "result",
+                "type": "boolean"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "getBlockThirdPartyCookies",
+        "type": "function",
+        "description": "Set Vivaldi default content settings.",
+        "parameters": [
+          {
+            "type": "function",
+            "name": "blockThirdParty",
+            "parameters": [
+              {
+                "name": "result",
+                "type": "boolean"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "openTaskManager",
+        "type": "function",
+        "description": "Opens Vivaldi task manager dialog.",
+        "parameters": [
+          {
+            "type": "function",
+            "name": "callback",
+            "parameters": [
+              {
+                "name": "result",
+                "type": "string"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "getStartupAction",
+        "type": "function",
+        "description": "Returns the startup action.",
+        "parameters": [
+          {
+            "type": "function",
+            "name": "callback",
+            "parameters": [
+              {
+                "name": "results",
+                "type": "string"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "setStartupAction",
+        "type": "function",
+        "description": "Returns the startup action.",
+        "parameters": [
+          {
+            "name": "startup",
+            "type": "string"
+          },
+          {
+            "name": "urls",
+            "type": "array",
+            "items": {"type": "string"}
+          },
+          {
+            "type": "function",
+            "name": "callback",
+            "parameters": [
+              {
+                "name": "results",
+                "type": "string"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "canShowWelcomePage",
+        "type": "function",
+        "description": "Checks whether showing the welcome page is allowed and is not disabled by --no-first-run or similar.",
+        "parameters": [
+          {
+            "type": "function",
+            "name": "callback",
+            "parameters": [
+              {
+                "name": "results",
+                "type": "boolean",
+                "description": "true if the welcome page can be shown, otherwise false."
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "events": [
+      {
+        "name": "onScroll",
+        "type": "function",
+        "description": "Fires for Mac when scroll device changes.",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "scrollType",
+            "minimum": 0,
+            "description":"Device that triggers scrolling. 1: Mouse, 2: Trackpad 3: Inertial"
+          }
+        ]
+      },
+      {
+        "name": "onSharedDataUpdated",
+        "type": "function",
+        "description": "Fires when a shared data value has changed or been added.",
+        "parameters": [
+          {
+            "name": "key",
+            "type": "string",
+            "description": "Name of the key for the value."
+          },
+          {
+            "name": "value",
+            "type": "any",
+            "description": "The new value for the key."
+          }
+        ]
+      },
+      {
+        "name": "onSuspend",
+        "type": "function",
+        "description": "Fired when the computer is about to suspend."
+      },
+      {
+        "name": "onResume",
+        "type": "function",
+        "description": "Fired when the computer has resumed from suspension."
+      }
+    ]
+  }
+]

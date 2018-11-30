@@ -1,0 +1,187 @@
+import("//vivaldi/gn/config/version.gni")
+import("//vivaldi/gn/config/product.gni")
+import("//vivaldi/gn/command_action.gni")
+
+assert(is_mac)
+
+import("//vivaldi/gn/config/signer_features.gni")
+
+build_app_dmg_script_path = "//vivaldi/thirdparty/create_dmg/create-dmg"
+mac_signing_key = getenv("VIVALDI_SIGNING_KEY")
+mac_signing_id = getenv("VIVALDI_SIGNING_ID")
+
+dmg_name = "Vivaldi.$vivaldi_version_full.dmg"
+
+perform_signing = mac_signing_key != "" && mac_signing_id != ""
+if (mac_signing_id != "") {
+  # Dummy use to avoid unused variable errors
+}
+
+signing_deps = []
+if (perform_signing) {
+  signing_deps += [ ":sign_mac" ]
+  mac_product_name = "Vivaldi"
+  mac_packaging_dir = "$root_build_dir/$mac_product_name Packaging"
+
+  # <(PRODUCT_DIR) expands to $(BUILT_PRODUCTS_DIR), which doesn't
+  # work properly in a shell script, where ${BUILT_PRODUCTS_DIR} is
+  # needed.
+  #mac_packaging_sh_dir = "\${BUILT_PRODUCTS_DIR}/$mac_product_name Packaging"
+  mac_app_name = "$root_build_dir/$mac_product_name.app"
+  mac_signed_inner_framework = "$root_build_dir/$mac_product_name.app/Contents/Versions/$vivaldi_version_full/$mac_product_name Framework.framework/$mac_product_name Framework"
+}
+
+group("mac") {
+  deps = [ ":build_dmg" ] + signing_deps
+}
+
+command_bash("build_dmg") {
+  command = build_app_dmg_script_path
+  deps = []
+  if (!perform_signing || !is_full_mac_signer) {
+    deps += [
+              "//chrome/installer/mac",
+              "//vivaldi:vivaldi",
+            ]
+  }
+  deps += signing_deps
+
+  icns = "//vivaldi/installer/mac/icons/$VIVALDI_RELEASE_KIND/disk_image.icns"
+  eula = "//vivaldi/installer/mac/licenses/en.rtf"
+  background = "//vivaldi/installer/mac/background/vivaldi_dmg_background.tif"
+
+  inputs = [
+    background,
+    command,
+    eula,
+    icns,
+    "//vivaldi/thirdparty/create_dmg/support/dmg-license.py",
+    "//vivaldi/thirdparty/create_dmg/support/template.applescript",
+  ]
+
+  outputs = [
+    "$root_build_dir/$dmg_name",
+  ]
+
+  args = [
+    "--volname","Vivaldi $vivaldi_version_full.dmg",
+    "--volicon", rebase_path(icns, root_build_dir),
+    "--eula", rebase_path(eula, root_build_dir),
+    "--background", rebase_path(background, root_build_dir),
+    "--window-pos", "100", "100",
+    "--window-size", "577", "368",
+    "--text-size", "13",
+    "--icon-size", "128",
+    "--icon", "Vivaldi", "158", "152",
+    "--icon", ".background", "1000", "152",
+    "--icon", ".fseventsd", "1100", "152",
+    "--icon", ".VolumeIcon.icns", "1200", "152",
+    "--app-drop-link", "412", "152",
+    "--no-internet-enable",
+    "Vivaldi.$vivaldi_version_full.dmg",
+    "Vivaldi.app",
+  ]
+}
+
+if (perform_signing) {
+  group("sign_mac") {
+    deps = [
+      ":sign_inner_bundle",
+      ":sign_package",
+      ":create_tar",
+    ]
+  }
+  command_bash("sign_inner_bundle") {
+    if (!perform_signing || !is_full_mac_signer) {
+      deps = [
+        "//chrome/installer/mac",
+        "//vivaldi:vivaldi",
+      ]
+    }
+    command = "$mac_packaging_dir/sign_versioned_dir.sh"
+    inputs = [
+      #command,
+    ]
+    outputs = [
+      "$root_gen_dir/signed_version.done",
+      mac_signed_inner_framework,
+    ]
+    args = [
+      rebase_path(mac_app_name, root_build_dir),
+      mac_signing_key,
+      mac_signing_id,
+    ]
+  }
+
+  command_bash("sign_package") {
+    deps = [
+      ":sign_inner_bundle",
+    ]
+    if (!perform_signing || !is_full_mac_signer) {
+      deps += [
+        "//chrome/installer/mac",
+        "//vivaldi:vivaldi",
+      ]
+    }
+    command = "$mac_packaging_dir/sign_app.sh"
+    inputs = [
+      #command,
+      mac_signed_inner_framework,
+    ]
+    outputs = [
+      "$root_gen_dir/signed_package.done",
+    ]
+    args = [
+      rebase_path(mac_app_name, root_build_dir),
+      mac_signing_key,
+      mac_signing_id,
+    ]
+  }
+
+  #correct permissions in app before tar-ing it.
+  system_command("chmod_app") {
+    deps = [
+      ":sign_inner_bundle",
+      ":sign_package",
+    ]
+    if (!perform_signing || !is_full_mac_signer) {
+      deps += [
+        "//chrome/installer/mac",
+        "//vivaldi:vivaldi",
+      ]
+    }
+    command = "find"
+    app_path = "$root_build_dir/Vivaldi.app"
+    inputs = [
+      mac_signed_inner_framework,
+    ]
+    outputs = [
+      "$root_gen_dir/chmod.done",
+    ]
+    args = [
+      rebase_path(app_path, root_build_dir),
+      "-exec", "chmod", "-h", "a-st+rX,u+w,go-w", "{}", ";"
+    ]
+  }
+
+  system_command("create_tar") {
+    deps = [
+      ":chmod_app",
+      ":sign_package",
+    ]
+    command = "tar"
+    app_path = "$root_build_dir/Vivaldi.app"
+    tar_path = "$root_build_dir/Vivaldi.$vivaldi_version_full.tar.xz"
+    inputs = [
+      "$root_gen_dir/chmod.done",
+      "$root_gen_dir/signed_package.done",
+    ]
+    outputs = [tar_path]
+
+    args = [
+      "cfJ",
+      rebase_path(tar_path, root_build_dir),
+      rebase_path(app_path, root_build_dir)
+    ]
+  }
+}

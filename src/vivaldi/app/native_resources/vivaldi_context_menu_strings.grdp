@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Vivaldi context menu specific strings (included from vivaldi_native_strings.grd). -->
+<grit-part>
+    <message name="IDS_VIV_CONTENT_CONTEXT_ADDSEARCHENGINE" desc="The name of the Add as Search Engine command in the content area context menu">
+        Add as Search En&amp;gine...
+    </message>
+    <message name="IDS_VIV_OPEN_IMAGE_CURRENT_TAB" desc="Where to open an image">
+        Open Image
+    </message>
+    <message name="IDS_VIV_OPEN_IMAGE_NEW_FOREGROUND_TAB" desc="Where to open an image">
+        Open Image in New Tab
+    </message>
+    <message name="IDS_VIV_OPEN_IMAGE_NEW_BACKGROUND_TAB" desc="Where to open an image">
+        Open Image in New Background Tab
+    </message>
+    <message name="IDS_VIV_OPEN_IMAGE_NEW_WINDOW" desc="Where to open an image">
+        Open Image in New Window
+    </message>
+    <message name="IDS_VIV_OPEN_IMAGE_NEW_PRIVATE_WINDOW" desc="Where to open an image">
+        Open Image in Private Window
+    </message>
+    <message name="IDS_VIV_OPEN_LINK_CURRENT_TAB" desc="Where to open a link">
+        Open Link
+    </message>
+    <message name="IDS_VIV_OPEN_LINK_NEW_FOREGROUND_TAB" desc="Where to open a link">
+        Open Link in New Tab
+    </message>
+    <message name="IDS_VIV_OPEN_LINK_NEW_BACKGROUND_TAB" desc="Where to open a link">
+        Open Link in New Background Tab
+    </message>
+    <message name="IDS_VIV_OPEN_LINK_NEW_WINDOW" desc="Where to open a link">
+        Open Link in New Window
+    </message>
+    <message name="IDS_VIV_OPEN_LINK_NEW_PRIVATE_WINDOW" desc="Where to open a link">
+        Open Link in Private Window
+    </message>
+    <message name="IDS_VIV_COPY_TO_NOTE" desc="Save selected text as a new note">
+        Copy to Note
+    </message>
+    <message name="IDS_VIV_BOOKMARK_PAGE" desc="Save current page as a bookmark">
+        Bookmark Page
+    </message>
+    <message name="IDS_VIV_BOOKMARK_LINK" desc="Save current link as a bookmark">
+        Bookmark Link
+    </message>
+     <message name="IDS_VIV_COPY_PAGE_ADDRESS" desc="Copy current page address to clipboard">
+        Copy Page Address
+    </message>
+    <message name="IDS_VIV_ADD_PAGE_TO_WEBPANEL" desc="Save current page as web panel">
+        Add Page to Web Panel
+    </message>
+    <message name="IDS_VIV_ADD_LINK_TO_WEBPANEL" desc="Save current link as web panel">
+        Add Link to Web Panel
+    </message>
+    <message name="IDS_VIV_USE_IMAGE_AS_BACKGROUND" desc="Use current image as start page background">
+        Use Image as Start Page Background
+    </message>
+    <message name="IDS_VIV_FULLSCREEN" desc="Enter/leave fullscreen mode">
+        Fullscreen
+    </message>
+    <message name="IDS_VIV_VALIDATE_PAGE" desc="Validate active page">
+        Validate
+    </message>
+    <message name="IDS_VIV_SEND_LINK_BY_MAIL" desc="Send clicked link by e-mail">
+        Send Link by Mail
+    </message>
+    <message name="IDS_VIV_SEND_BY_MAIL" desc="Send by e-mail">
+        Send by Mail
+    </message>
+    <message name="IDS_VIV_INSPECT_IMAGE" desc="Show information about image">
+        Image Properties...
+    </message>
+    <message name="IDS_VIV_ADD_ACTIVE_TAB_TO_BOOKMARKS" desc="Add active tab to bookmarks. Used in Mac main menu">
+        Add Active Tab
+    </message>
+    <message name="IDS_VIV_NO_TITLE" desc="A menu is missing a name">
+        (no title)
+    </message>
+</grit-part>

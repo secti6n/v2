@@ -1,0 +1,22 @@
+{
+  "flags": {
+    "bookmark_menu": {
+      "friendly_name": "Bookmark menu",
+      "description": "Enables a bookmark entry in the main menu for Windows and Linux. Always enabled for Mac.",
+      "value": "true",
+      "internal_value": "true"
+    },
+    "docked_devtools": {
+      "friendly_name": "Allow for docking devtools",
+      "description": "Lets Vivaldi support docking devtools with the main window",
+      "value": "true",
+      "internal_value": "true"
+    },
+    "sync": {
+      "friendly_name": "Sync",
+      "description": "Enables the synchronization functionality",
+      "value": "true",
+      "internal_value": "true"
+    }
+  }
+}

@@ -1,0 +1,4 @@
+
+update_target("//components/history/core/browser:browser") {
+  deps += [ "//vivaldi/prefs:prefs_strings" ]
+}

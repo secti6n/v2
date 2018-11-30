@@ -1,0 +1,291 @@
+@@include@@variables.include
+
+APT_GET="`which apt-get 2> /dev/null`"
+APT_CONFIG="`which apt-config 2> /dev/null`"
+
+SOURCES_PREAMBLE="### THIS FILE IS AUTOMATICALLY CONFIGURED ###
+# You may comment out this entry, but any other modifications may be lost.\n"
+
+# Parse apt configuration and return requested variable value.
+apt_config_val() {
+  APTVAR="$1"
+  if [ -x "$APT_CONFIG" ]; then
+    "$APT_CONFIG" dump | sed -e "/^$APTVAR /"'!d' -e "s/^$APTVAR \"\(.*\)\".*/\1/"
+  fi
+}
+
+# Remove expired repository/package signing key (7B8B44A1), if present.
+remove_old_key() {
+  APT_KEY="`which apt-key 2>/dev/null`"
+  if [ -x "$APT_KEY" ]; then
+    if "$APT_KEY" list 2>/dev/null | grep -qF 7B8B44A1; then
+      "$APT_KEY" del 7B8B44A1 >/dev/null 2>&1
+    fi
+  fi
+}
+
+# Install the repository/package signing key (C3401E12), if it isn't already.
+install_key() {
+  APT_KEY="`which apt-key 2>/dev/null`"
+  if [ -x "$APT_KEY" ]; then
+    if ! "$APT_KEY" list 2>/dev/null | grep -qF C3401E12; then
+      "$APT_KEY" add - >/dev/null 2>&1 <<KEYDATA
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+Version: GnuPG v1
+
+mQINBFh9700BEACfjuPRKbTaFB1y2yPlCMYfA9sw+Mu19g2AEpO4kXsqZPA1mfU0
+nGpZEBanbKbWaZNknr+4Gp0KrkSKL4ZywFeCMhEUXDsMU9dBCInVrhP9jzVJV4oP
+TfNY1fgcwiWNaOJFRt4rot9NNiEOWRRguCPki2285biGfl6bS5a5UqFyA8XQn0dv
+EyyuFQ1mSDJqSw7yYpHFuLsp1hUO1WtmezE6Cqkh1m50eXJmuB5jG8wM1NkGk8lk
+t2DgC/bMDwNIijJBsvBTuh9mdqH/u4TF3mysomMDy+vU8m9Uq5eSEoMKh9Bttai2
+brxPFfxw2u6OTSYbKdw0KmXCe4pNcyrK6jPKUTLaplhhn8vRnzVilQVeTIJPHM1O
+8bsio1LDTQl3K7AQtpqnu2N2nKRLtnTyOyDtfVC+PBS7Jvj4yDoImzqaiOaMcFKO
+DpeO8NudVBUunmgPWwUw4lv4rZyY5+6Rq9fHQGoh+dVnTjSyXVjBppD438RpPCRx
+MUlUddmpZmPsCYqdjnAV1J3kYlSyYOBu7PtssK9TwkzLP3xaMQFJrSRQw48Bc/Q/
+CgaXAYER5pVfQg78thj4gDT3yi1u5ozTmw1hkvaTu9RAJmo4svgWoCClfKJusfo3
+AwCxrgPcFqRWoyahUkpNNS/yKlbDtB6LLmFoO9SJuQ7CmKOXtP8AkGemywARAQAB
+tDVWaXZhbGRpIFBhY2thZ2UgQ29tcG9zZXIgS0VZMDMgPHBhY2thZ2VyQHZpdmFs
+ZGkuY29tPokCPgQTAQIAKAUCWH3vTQIbAwUJA8JnAAYLCQgHAwIGFQgCCQoLBBYC
+AwECHgECF4AACgkQbTeJ7cNAHhK6vQ//YFN3EmodDZL4mPZ5I2gyadFHqKKf79yV
+XiAPC2LOLBKMHGzxMlHDN6MVgCnkPSiGGiS1aJzozucNmg06g0H0DQA4WEg2iBPZ
+SnaCt72ONsPyDrrA7FJimHXCS7wrU4XD1shnnVi+ToV6mYWGiCwiwA6EpJlEYqRs
+ZDJuXAfJYPI85nAvhnysdCGFSEXYICxXhlRZvS234FkV81AmMukelJyZ8O44Ayvm
+ypYIYESBDGrj7wnJJvOE6+IIg7Hl/7XIa60MsN2t7Uo4b4En0yW0NRwwZ4uNUN8L
+tTxcjx20/IdoAEQrNe+UCieaWpUKDQHBOxerBT/PLAnPlpESqMYoAZ07V6VdjD5I
+LoD/iB3jYV4wT9nfWQqMcoyi2gm8HO3w7Nubq9OO3ao9Kd4n1B3S/uKkOZGOE5u9
+VdzvX+c4aBwU5A4nxpMTpE24WWfkHdgj6C/E7eZAfr41pAi9zStecLscqGB5shmX
+5odBk1qAHzvjPk+/zmlh3hEXTaCk5Qi0me8BHiLJC5SMr0XgkQTBC4aSa2Jsbthq
+xcX4oAdb4wbXEiDSatiZjA/hge87OCNsHP6E/5mctran9JsX4kFY/bL/gdsgQ7Zg
+AOa0rSKXeI7vboaveZzst53mN1+8yItV2UQpB5f51/QGLcGy8LnkZgp8UJ4kjpmd
+m2DRBz/IWeC5Ag0EWH3vTQEQAOXfpNZh2Rq5frcawVacN1e4ahorOspOQ6xZZQdl
+iq8EM6YDwZMVSv3ssPMMvcas6ROmCyT+8eeVuiLtlUEAPfgH7Ro8S3tXltS5Zxtp
+4z+yBaKVQw1IrmKTANMsRO+7gu5IHpvUgGhDWi3J4OriIJw2o/Lznf3pBOmnO1pk
+Qgx1bDCDzcauqtQoWrmPikgq010gNU2wdDWTJkgn5BeYrn8gp3tyY5qSFL6Dth2U
+KoYEGwom5QDN9bA/oKRedY9hHdOkqlGedsIAXBIdwp89Cnot/fSUDCOqjZjUHbAb
+lNagPylWsJMne2m2hdWief5YXhsvc/CgSiy3XHkIJkNkpSABzDEV7ulsdVPjr1KL
+AA1ffynx+kSwKNEV10xAIwWhGc1f43z20dAQGEyo2+Wt2sX1RTLe6HCa/0nryVOc
+6YlMI8kPpq15mRPdN1mvwqz+mQtHbOF4mxKjt+lW1NRm7tWwZKU50nzqy1j+aujL
+Q/+Y99SGaXbZbjPffe6HFAG5bEvhJAtfLNW0QZJNavZdwqslmhdyEnC1NPjedubr
+8Ct8hzKxtHOnKYZqACBkkkUCZI32pHbG8JJiLzEPJOivpWlrLt9063gHsgtuVLEk
+FY+qsrCSCQL1g8KBhvhw0WwGuqOhNGCccgZTYZSngshfm1YlXsKAgqGVWC2vMBz6
+ockRABEBAAGJAiUEGAECAA8FAlh9700CGwwFCQPCZwAACgkQbTeJ7cNAHhI1xQ//
+QZwfWqpB9Fl6UlwbCsikxb/yeye3LMQjeJaVkDxa4op15+LBlnOby/rBA8WtGfBq
+KqjH76uAvgaefleOJjJFTwTAGUIt/Db5PvhKztAzdNJeUIGBEz1QlmC16/9hhlgJ
+e1UCXRgd+z59bRY8acV113BxdIV26KU6rbK24Z442LIx07FneNJuoXgfN9Fm+/8T
+FeRD6+kMxzF9i1dVU+/EIufyUbFMA08KnlaevT6umDwHArGPIYjoJ5xVQl04x8dd
+RPrX2FpEHffFla8veKIM8x/T2yQwJeyXbLOsdVVvvGEHStinmePlkX6JV9A243/P
+IAtYo6GK1s8vqVV5kIJhkdsFG6nFVv4Zymhk5LUD9aRVY+wdelsrbOxWSf+TQz7n
+37Or9Tu3LeAlx1wlym8NO+RFo2haCN53PAIqOOWMYZVM9JAq9FxkCF7uLIe9afd2
+ErzEbAPt2yax2at6QvS+CBXlPh7qZ0xzuqDAtHJuZ41Umjr1vo2fXUwn+9dr+EtF
+0KgR8nB31mEerr6wg+d1JoAKPnQ8Ja1xvlHakMa/WswzhtVwL63Z2G9VhAhN0jWv
+4X3uu8Y3gXeQFQoiHHX0zxMKNdv2ujyqG8UQWqENOpgjfcv5TtsaWJrpW267BE61
+R6o2nS+jYNBfJ1GD07srhQQtdgjDLgb8u197g8MhI1I=
+=iQPH
+-----END PGP PUBLIC KEY BLOCK-----
+KEYDATA
+    fi
+  fi
+}
+
+# Install another key (EFB20B23), if it isn't already, for future use.
+install_future_key() {
+  APT_KEY="`which apt-key 2>/dev/null`"
+  if [ -x "$APT_KEY" ]; then
+    if ! "$APT_KEY" list 2>/dev/null | grep -qF EFB20B23; then
+      "$APT_KEY" add - >/dev/null 2>&1 <<KEYDATA
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+Version: GnuPG v1
+
+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
+=/TZJ
+-----END PGP PUBLIC KEY BLOCK-----
+KEYDATA
+    fi
+  fi
+}
+
+# Set variables for the locations of the apt sources lists.
+find_apt_sources() {
+  eval $("$APT_CONFIG" shell APT_SOURCESDIR 'Dir::Etc::sourceparts/d')
+}
+
+# Update the Google repository if it's not set correctly.
+# Note: this doesn't necessarily enable the repository, it just makes sure the
+# correct settings are available in the sources list.
+# Returns:
+# 0 - no update necessary
+# 2 - error
+update_bad_sources() {
+  if [ ! "$REPOCONFIG" ]; then
+    return 0
+  fi
+
+  find_apt_sources
+
+  SOURCELIST="$APT_SOURCESDIR/@@PACKAGE@@.list"
+  # Don't do anything if the file isn't there, since that probably means the
+  # user disabled it.
+  if [ ! -r "$SOURCELIST" ]; then
+    return 0
+  fi
+
+  # Basic check for active configurations (non-blank, non-comment lines).
+  ACTIVECONFIGS=$(grep -v "^[[:space:]]*\(#.*\)\?$" "$SOURCELIST" 2>/dev/null)
+
+  # Check if the correct repository configuration is in there.
+  REPOMATCH=$(grep -E "^[[:space:]#]*\b$REPOCONFIGREGEX\b" "$SOURCELIST" \
+    2>/dev/null)
+
+  # Check if the correct repository is disabled.
+  MATCH_DISABLED=$(echo "$REPOMATCH" | grep "^[[:space:]]*#" 2>/dev/null)
+
+  # Now figure out if we need to fix things.
+  BADCONFIG=1
+  if [ "$REPOMATCH" ]; then
+    # If it's there and active, that's ideal, so nothing to do.
+    if [ ! "$MATCH_DISABLED" ]; then
+      BADCONFIG=0
+    else
+      # If it's not active, but neither is anything else, that's fine too.
+      if [ ! "$ACTIVECONFIGS" ]; then
+        BADCONFIG=0
+      fi
+    fi
+  fi
+
+  if [ $BADCONFIG -eq 0 ]; then
+    return 0
+  fi
+
+  # At this point, either the correct configuration is completely missing, or
+  # the wrong configuration is active. In that case, just abandon the mess and
+  # recreate the file with the correct configuration. If there were no active
+  # configurations before, create the new configuration disabled.
+  DISABLE=""
+  if [ ! "$ACTIVECONFIGS" ]; then
+    DISABLE="#"
+  fi
+  printf "$SOURCES_PREAMBLE" > "$SOURCELIST"
+  printf "$DISABLE$REPOCONFIG\n" >> "$SOURCELIST"
+  if [ $? -eq 0 ]; then
+    return 0
+  fi
+  return 2
+}
+
+# Add the Google repository to the apt sources.
+# Returns:
+# 0 - sources list was created
+# 2 - error
+create_sources_lists() {
+  if [ ! "$REPOCONFIG" ]; then
+    return 0
+  fi
+
+  find_apt_sources
+
+  SOURCELIST="$APT_SOURCESDIR/@@PACKAGE@@.list"
+  if [ -d "$APT_SOURCESDIR" ]; then
+    printf "$SOURCES_PREAMBLE" > "$SOURCELIST"
+    printf "$REPOCONFIG\n" >> "$SOURCELIST"
+    if [ $? -eq 0 ]; then
+      return 0
+    fi
+  fi
+  return 2
+}
+
+# Remove our custom sources list file.
+# Returns:
+# 0 - successfully removed, or not configured
+# !0 - failed to remove
+clean_sources_lists() {
+  if [ ! "$REPOCONFIG" ]; then
+    return 0
+  fi
+
+  find_apt_sources
+
+  rm -f "$APT_SOURCESDIR/@@PACKAGE@@.list"
+}
+
+# Detect if the repo config was disabled by distro upgrade and enable if
+# necessary.
+handle_distro_upgrade() {
+  if [ ! "$REPOCONFIG" ]; then
+    return 0
+  fi
+
+  find_apt_sources
+  SOURCELIST="$APT_SOURCESDIR/@@PACKAGE@@.list"
+  if [ -r "$SOURCELIST" ]; then
+    REPOLINE=$(grep -E "^[[:space:]]*#[[:space:]]*$REPOCONFIGREGEX[[:space:]]*# disabled on upgrade to .*" "$SOURCELIST")
+    if [ $? -eq 0 ]; then
+      sed -i -e "s,^[[:space:]]*#[[:space:]]*\(.*\)[[:space:]]*# disabled on upgrade to .*,\1," \
+        "$SOURCELIST"
+      LOGGER=$(which logger 2> /dev/null)
+      if [ "$LOGGER" ]; then
+        "$LOGGER" -t "$0" "Reverted repository modification: $REPOLINE."
+      fi
+    fi
+  fi
+}
+
+DEFAULT_ARCH="@@ARCHITECTURE@@"
+
+get_lib_dir() {
+  if [ "$DEFAULT_ARCH" = "i386" ]; then
+    LIBDIR=lib/i386-linux-gnu
+  elif [ "$DEFAULT_ARCH" = "amd64" ]; then
+    LIBDIR=lib/x86_64-linux-gnu
+  else
+    echo Unknown CPU Architecture: "$DEFAULT_ARCH"
+    exit 1
+  fi
+}

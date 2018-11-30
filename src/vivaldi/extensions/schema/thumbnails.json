@@ -1,0 +1,213 @@
+// Copyright (c) 2015-2016 Vivaldi Technologies AS. All rights reserved.
+
+[
+  {
+    "namespace": "thumbnails",
+    "description": "Thumbnail capture support api.",
+    "types": [
+      {
+        "id": "ThumbnailQueryResult",
+        "type": "object",
+        "description": "A structure containing the result of the isThumbnailAvailable call.",
+        "properties": {
+          "hasThumbnail": {
+            "type": "boolean",
+            "description": "true if a thumbnail is available, otherwise false."
+          },
+          "thumbnailUrl": {
+            "type": "string",
+            "description": "The url pointing to the available thumbnail"
+          }
+        }
+      },
+      {
+        "id": "CaptureUIParams",
+        "type": "object",
+        "description": "A structure containing parameters for the captureUI call.",
+        "properties": {
+          "windowId": {
+            "type": "integer",
+            "description": "Window id to capture."
+          },
+          "posX": {
+            "type": "integer",
+            "description": "X offset inside the given app window."
+          },
+          "posY": {
+            "type": "integer",
+            "description": "Y offset inside the given app window."
+          },
+          "width": {
+            "type": "integer",
+            "description": "Width of the capture."
+          },
+          "height": {
+            "type": "integer",
+            "description": "Height of the capture."
+          },
+          "encodeFormat": {
+            "type": "string",
+            "optional": true,
+            "description": "The encoding format. 'jpg' or 'png'. Defaults to 'png'."
+          },
+          "encodeQuality": {
+            "type": "integer",
+            "optional": true,
+            "description": "The jpg encoding quality if format is 'jpg', otherwise ignored. Default is 90, which is very high quality."
+          },
+          "saveToDisk": {
+            "type": "boolean",
+            "optional": true,
+            "description": "The resulting image is saved under the configurable directory. Default is false."
+          },
+          "showFileInPath": {
+            "type": "boolean",
+            "optional": true,
+            "description": "If |saveToBasePath| is provided, setting this to true will open the folder with the file selected after capture has completed. Default is false."
+          },
+          "encodeToDataUrl": {
+            "type": "boolean",
+            "optional": true,
+            "description": "If true, the appropiate data will be inserted to make it a valid data url that can be set as url in elements. Default is false."
+          },
+          "copyToClipboard": {
+            "type": "boolean",
+            "optional": true,
+            "description": "If true, will copy the image to clipboard in a raw and uncompressed format. This will override any file path arguments. Default is false."
+          }
+        }
+      },
+      {
+        "id": "CaptureTabParams",
+        "type": "object",
+        "description": "A structure containing parameters for the captureTab call.",
+        "properties": {
+          "encodeFormat": {
+            "type": "string",
+            "optional": true,
+            "description": "The encoding format. 'jpg' or 'png'. Defaults to 'png'."
+          },
+          "encodeQuality": {
+            "type": "integer",
+            "optional": true,
+            "description": "The jpg encoding quality if format is 'jpg', otherwise ignored. Default is 90, which is very high quality."
+          },
+          "fullPage": {
+            "type": "boolean",
+            "optional": true,
+            "description": "true to capture the full height of the page, restricted to 20000 pixels height. Default is false."
+          },
+          "width": {
+            "type": "integer",
+            "optional": true,
+            "description": "The resulting width of the capture after scaling. Ignored if |fullPage| is true."
+          },
+          "height": {
+            "type": "integer",
+            "optional": true,
+            "description": "The resulting height of the capture after scaling or if onlyVisible is false, the maximum number of pixels to capture in height."
+          },
+          "saveToDisk": {
+            "type": "boolean",
+            "optional": true,
+            "description": "The resulting image is saved under the configurable directory. Default is false."
+          },
+          "showFileInPath": {
+            "type": "boolean",
+            "optional": true,
+            "description": "If |saveToBasePath| is provided, setting this to true will open the folder with the file selected after capture has completed. Default is false."
+          },
+          "copyToClipboard": {
+            "type": "boolean",
+            "optional": true,
+            "description": "If true, will copy the image to clipboard in a raw and uncompressed format. This will override any file path arguments. Default is false."
+          }
+        }
+      }
+    ],
+    "functions": [
+      {
+        "name": "isThumbnailAvailable",
+        "type": "function",
+        "description": "Checks whether a thumbnail is available for the given data",
+        "parameters": [
+          {
+            "name": "bookmarkId",
+            "type": "string",
+            "description": "The bookmark id to check for available thumbnail"
+          },
+          {
+            "name": "url",
+            "type": "string",
+            "description": "The url of a site to check for thumbnail availability"
+          },
+          {
+            "type": "function",
+            "name": "callback",
+            "optional": true,
+            "parameters": [
+              {
+                "name": "result",
+                "$ref": "ThumbnailQueryResult"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "captureUI",
+        "type": "function",
+        "description": "Captures a part of the visible UI for the given app window.",
+        "parameters": [
+          {
+            "name": "params",
+            "$ref": "CaptureUIParams"
+          },
+          {
+            "type": "function",
+            "name": "callback",
+            "parameters": [
+              {
+                "name": "image",
+                "type": "string",
+                "description": "base64-encoded png of the captured image."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "captureTab",
+        "type": "function",
+        "description": "Captures the contents of a tab.",
+        "parameters": [
+          {
+            "name": "tabId",
+            "type": "integer",
+            "description": "The tab id to capture."
+          },
+          {
+            "name": "params",
+            "$ref": "CaptureTabParams"
+          },
+          {
+            "type": "function",
+            "name": "callback",
+            "parameters": [
+              {
+                "name": "tabId",
+                "type": "integer",
+                "description": "The tab id that was captured."
+              },
+              {
+                "name": "image",
+                "type": "string",
+                "description": "base64-encoded jpg of the captured image or, if |saveToBasePath| is used, the full path to the image on disk."
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

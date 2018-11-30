@@ -1,0 +1,27 @@
+# Copyright (c) 2015-2017 Vivaldi Technologies AS. All rights reserved
+
+if(!is_android) {
+  update_template_instance("//chrome/test:sync_integration_tests") {
+    sources += [
+      "//vivaldi/sync/test/integration/single_client_notes_sync_test.cpp",
+      "//vivaldi/sync/test/integration/two_client_notes_sync_test.cpp",
+      "//vivaldi/sync/test/vivaldi_single_client_bookmarks_sync_test.cc",
+      "//vivaldi/sync/test/vivaldi_two_client_bookmarks_sync_test.cc",
+    ]
+  }
+}
+
+update_template_instance("//components/sync:sync") {
+  sources += [
+    "//vivaldi/sync/vivaldi_hash_util.h",
+    "//vivaldi/sync/vivaldi_prefs_names.cc",
+    "//vivaldi/sync/vivaldi_prefs_names.h",
+    "//vivaldi/sync/vivaldi_sync_utils.cc",
+  ]
+}
+
+update_target("//components/sync_sessions:sync_sessions") {
+  sources += [
+    "//vivaldi/sync/glue/vivaldi_synced_tab_delegate.cc",
+  ]
+}

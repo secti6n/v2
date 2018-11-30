@@ -1,0 +1,59 @@
+// Copyright (c) 2015 Vivaldi Technologies AS. All rights reserved
+
+[
+  {
+    "namespace": "autoUpdate",
+    "compiler_options": {
+      "implemented_in": "extensions/api/auto_update/auto_update_api.h"
+    },
+    "platforms": ["win", "mac"],
+    "description": "Use the <code>chrome.autoupdate</code> API to interact with (Win)Sparkle.",
+    "types": [
+    ],
+    "functions": [
+      {
+        "name": "checkForUpdates",
+        "type": "function",
+        "description": "Check for Vivaldi browser updates.",
+        "parameters": [
+          {
+            "name": "withUi",
+            "type": "boolean",
+            "description": "Indicates whether we want the auto-update ui to appear."
+          }
+        ]
+      },
+      {
+        "name": "isUpdateNotifierEnabled",
+        "type": "function",
+        "description": "Checks whether the update notifier is set to run on startup.",
+        "parameters": [
+          {
+            "name": "callback",
+            "type": "function",
+            "parameters": [
+              {
+                "type": "boolean",
+                "name": "result"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "enableUpdateNotifier",
+        "type": "function",
+        "description": "Sets the update notifier to run on startup and launches it.",
+        "parameters": []
+      },
+      {
+        "name": "disableUpdateNotifier",
+        "type": "function",
+        "description": "Removes the update notifier from autorun and attempts to terminate it.",
+        "parameters": []
+      }
+    ],
+    "events": [
+    ]
+  }
+]

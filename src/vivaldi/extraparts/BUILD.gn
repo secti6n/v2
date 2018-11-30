@@ -1,0 +1,52 @@
+import("//build/config/jumbo.gni")
+
+jumbo_source_set("extraparts") {
+  sources = [
+    "vivaldi_browser_main_extra_parts.cc",
+    "vivaldi_browser_main_extra_parts.h",
+  ]
+  if (is_linux) {
+    sources += [
+      "vivaldi_browser_main_extra_parts_linux.h",
+      "vivaldi_browser_main_extra_parts_linux.cc",
+    ]
+  }
+  if (is_mac) {
+    sources += [
+      "vivaldi_browser_main_extra_parts_mac.h",
+      "vivaldi_browser_main_extra_parts_mac.mm",
+      "maybe_setup_vivaldi_keychain.h",
+      "maybe_setup_vivaldi_keychain.mm",
+    ]
+  }
+  if (is_win) {
+    sources += [
+      "vivaldi_browser_main_extra_parts_win.h",
+      "vivaldi_browser_main_extra_parts_win.cc",
+    ]
+  }
+  if (is_android) {
+    sources += [
+      "vivaldi_browser_main_extra_parts_android.h",
+      "vivaldi_browser_main_extra_parts_android.cc",
+    ]
+  }
+  deps = [
+    "//base:base",
+    #"//chrome/browser",
+    "//chrome/common:constants",
+    "//skia",
+    "//third_party/blink/public:blink_headers",
+    "//vivaldi/extensions/schema:api",
+    "//vivaldi/calendar",
+    "//vivaldi/contact",
+    "//vivaldi/notes:browser",
+  ]
+  if (!is_android) {
+    deps += [
+      "//vivaldi/extensions/schema:api",
+    ]
+  }
+
+  configs += [ "//build/config/compiler:no_size_t_to_int_warning" ]
+}

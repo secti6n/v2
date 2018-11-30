@@ -1,0 +1,42 @@
+import("//build/config/jumbo.gni")
+
+jumbo_static_library("ui") {
+  sources = [
+    "lazy_load_service_factory.cc",
+    "lazy_load_service_factory.h",
+    "lazy_load_service.cc",
+    "lazy_load_service.h",
+    "views/vivaldi_pin_shortcut.cpp",
+    "views/vivaldi_pin_shortcut.h",
+    "webgui/notes_ui.cpp",
+    "webgui/notes_ui.h",
+    "webgui/vivaldi_web_ui_controller_factory.cpp",
+    "webgui/vivaldi_web_ui_controller_factory.h",
+  ]
+  if (is_mac) {
+    sources += [
+      "dragging/drag_tab_handler_helper_mac.h",
+      "dragging/drag_tab_handler_helper_mac.mm",
+    ]
+  }
+  public_configs = [ "//third_party/protobuf:using_proto" ]
+  deps = [
+    "//base:base",
+    "//components/translate/content/browser",
+    "//content/public/browser",
+    "//vivaldi/prefs:prefs_files_generator",
+    "//skia",
+  ]
+  if (!is_android) {
+    sources += [
+      "devtools/devtools_connector.cc",
+      "devtools/devtools_connector.h",
+      "dragging/drag_tab_handler.cc",
+      "dragging/drag_tab_handler.h",
+    ]
+    deps += [
+      "//chrome/browser/extensions:extensions",
+      "//vivaldi/extensions/schema:api"
+    ]
+  }
+}

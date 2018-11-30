@@ -1,0 +1,85 @@
+# Copyright (c) 2015-2017 Vivaldi Technologies AS. All rights reserved
+
+import("//build/config/jumbo.gni")
+
+jumbo_static_library("notes") {
+  sources = [
+    "note_attachment.cpp",
+    "note_attachment.h",
+    "notes_codec.cpp",
+    "notes_codec.h",
+    "notes_model.cpp",
+    "notes_model.h",
+    "notes_storage.cpp",
+    "notes_storage.h",
+    "notesnode.cpp",
+    "notesnode.h",
+    "scoped_group_notes_actions.cpp",
+    "scoped_group_notes_actions.h",
+  ]
+  deps = [
+    "//base:base",
+    "//base:i18n",
+    #"//chrome:strings",
+    #"//chrome/common/importer:interfaces",
+    "//components/keyed_service/core:core",
+    "//components/keyed_service/content:content",
+    "//components/renderer_context_menu:renderer_context_menu",
+    "//content/public/browser",
+    "//skia",
+    "//third_party/icu",
+    "//ui/base:base",
+    "//url:url",
+    "//vivaldi/app:vivaldi_native_resources",
+    "//vivaldi/app:vivaldi_unscaled_native_resources",
+  ]
+  public_deps = [
+    #"//chrome/browser",
+    "//components/bookmarks/browser",
+    "//components/renderer_context_menu",
+    "//components/sync/protocol",
+    #"//vivaldi/sync",
+  ]
+}
+
+jumbo_static_library("browser") {
+  sources = [
+    "notes_factory.cpp",
+    "notes_factory.h",
+    "notes_model_loaded_observer.cpp",
+    "notes_model_loaded_observer.h",
+    "notes_model_observer.h",
+    "notes_submenu_observer.cc",
+    "notes_submenu_observer.h",
+  ]
+  deps = [
+    "//base:base",
+    "//base:i18n",
+    "//chrome:strings",
+    "//components/keyed_service/core:core",
+    "//components/keyed_service/content:content",
+    "//components/renderer_context_menu:renderer_context_menu",
+    "//content/public/browser",
+    "//skia",
+  ]
+  public_deps = [
+    ":notes",
+    "//components/bookmarks/browser",
+  ]
+}
+
+source_set("unit_tests") {
+  testonly = true
+  sources = [
+    "notes_codec_unittest.cpp"
+  ]
+  deps = [
+    "//skia",
+    "//testing/gtest",
+    "//third_party/boringssl",
+  ]
+  public_deps = [
+    ":notes",
+    "tests:notes",
+  ]
+}

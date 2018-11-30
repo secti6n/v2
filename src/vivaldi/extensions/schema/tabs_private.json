@@ -1,0 +1,317 @@
+// Copyright (c) 2016 Vivaldi Technologies AS. All rights reserved
+
+[
+  {
+    "namespace": "tabsPrivate",
+    "description": "Use the <code>vivaldi.tabsPrivate</code> API to update tabs",
+    "compiler_options": {
+      "implemented_in": "extensions/api/tabs/tabs_private_api.h"
+    },
+    "types": [
+      {
+        "id": "MediaType",
+        "type": "string",
+        "description": "The active media type.",
+        "enum": [ "empty", "recording", "capturing", "playing", "muting", "bluetooth", "usb", "pip", "desktop_capturing" ]
+      },
+      {
+        "id": "UpdateTabInfo",
+        "type": "object",
+        "description": "Object passed to the update and returned in the get function function.",
+        "properties": {
+          "showImages": {
+            "type": "boolean",
+            "optional": true,
+            "description": "Show images for all pages loaded in this tab. Default is true."
+          },
+          "loadFromCacheOnly": {
+            "type": "boolean",
+            "optional": true,
+            "description": "Only load the page from cache. Default is false."
+          },
+          "enablePlugins": {
+            "type": "boolean",
+            "optional": true,
+            "description": "Enable plugins on this tab. Default is true."
+          },
+          "mimeType": {
+            "type": "string",
+            "optional": true,
+            "description": "The current documents mimetype."
+          }
+        }
+      },
+      {
+        "id": "DragData",
+        "type": "object",
+        "description": "Provides custom drag data.",
+        "properties": {
+          "mimeType": {
+            "type": "string",
+            "description": "The mime type to use for the custom data."
+          },
+          "customData": {
+            "type": "string",
+            "description": "The custom data."
+          },
+          "url": {
+            "type": "string",
+            "description": "The url for the data. Needed for the html5 drag and drop engine. Not set in the onDropEnd event."
+          },
+          "title": {
+            "type": "string",
+            "description": "The title for the data. Needed for the html5 drag and drop engine. Not set in the onDropEnd event."
+          }
+        }
+      },
+      {
+        "id": "DragImage",
+        "type": "object",
+        "description": "Provides a custom drag image with cursor offset.",
+        "properties": {
+          "image": {
+            "type": "string",
+            "description": "Base 64 encoded jpg or png image to be used as the drag image."
+          },
+          "cursorX": {
+            "type": "integer",
+            "description": "X offset into the image for the cursor during drag."
+          },
+          "cursorY": {
+            "type": "integer",
+            "description": "Y offset into the image for the cursor during drag."
+          }
+        }
+      }
+    ],
+    "functions": [
+      {
+        "name": "update",
+        "type": "function",
+        "description": "Update the given tab with Vivaldi-specific properties.",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "tabId",
+            "minimum": 0
+          },
+          {
+            "name": "tabInfo",
+            "$ref": "UpdateTabInfo"
+          }
+        ]
+      },
+      {
+        "name": "get",
+        "type": "function",
+        "description": "Get Vivaldi-specific properties from the tab.",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "tabId",
+            "minimum": 0
+          },
+          {
+            "type": "function",
+            "name": "callback",
+            "optional": true,
+            "parameters": [
+              {
+                "name": "tabInfo",
+                "$ref": "UpdateTabInfo"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "insertText",
+        "type": "function",
+        "description": "Insert text into editable fields.",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "tabId",
+            "minimum": 0
+          },
+          {
+            "type": "string",
+            "name": "text",
+            "description": "The text to insert"
+          }
+        ]
+      },
+      {
+        "name": "startDrag",
+        "type": "function",
+        "description": "Starts the HTML5 drag of the given tabs.",
+        "parameters": [
+          {
+            "$ref": "DragData",
+            "name": "dragData",
+            "description": "The drag data to be transported in the dataobject."
+          },
+          {
+            "$ref": "DragImage",
+            "name": "dragImage",
+            "optional": true,
+            "description": "The drag image in png or jpg format, base64 encoded. NOTE: Data URLs are not supported."
+          },
+          {
+            "name": "isFromTouch",
+            "type": "boolean",
+            "optional": true,
+            "description": "True if the drag was initiated from touch. Default is false."
+          }
+        ]
+      }
+    ],
+    "events": [
+      {
+        "name": "onMediaStateChanged",
+        "type": "function",
+        "description": "Fired when the media state changes on the tab.",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "tabId",
+            "minimum": 0
+          },
+          {
+            "name": "activeMediaType",
+            "$ref": "MediaType"
+          }
+        ]
+      },
+      {
+        "name": "onThemeColorChanged",
+        "type": "function",
+        "description": "Fired when a meta theme-color has a value from the web page.",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "tabId",
+            "minimum": 0
+          },
+          {
+            "type": "string",
+            "name": "rgb",
+            "description": "Fired when the theme-color in the meta header field has changed. Format is #rrggbb and provided in css hex."
+          }
+        ]
+      },
+      {
+        "name": "onTabUpdated",
+        "type": "function",
+        "description": "Fires when a |WebContent| is changed in some way.",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "tabId",
+            "minimum": 0
+          },
+          {
+            "name": "tabInfo",
+            "$ref": "UpdateTabInfo"
+          }
+        ]
+      },
+      {
+        "name": "onDragEnd",
+        "type": "function",
+        "description": "Fires when tab dragging ends.",
+        "parameters": [
+          {
+            "$ref": "DragData",
+            "name": "dragData",
+            "description": "The drag data that was passed in on drag start"
+          },
+          {
+            "name": "dragAborted",
+            "type": "boolean",
+            "description": "This is an aborted drag (using ESC or similar)."
+          },
+          {
+            "name": "dropOutsideWindow",
+            "type": "boolean",
+            "description": "This is a valid drop outside any app window."
+          },
+          {
+            "name": "posX",
+            "type": "integer",
+            "description": "X position of the drop in screen coordinates."
+          },
+          {
+            "name": "posY",
+            "type": "integer",
+            "description": "Y position of the drop in screen coordinates."
+          }
+        ]
+      },
+      {
+        "name": "onPermissionAccessed",
+        "type": "function",
+        "description": "Fires when a |permission| is accessed.",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "tabId",
+            "minimum": 0
+          },
+          {
+            "type": "string",
+            "name": "permission"
+          },
+          {
+            "type": "string",
+            "name": "origin"
+          },
+          {
+            "type": "string",
+            "description": "Current permission setting. 'allow', 'block', 'ask' or 'default'",
+            "name": "blocked"
+          }
+        ]
+      },
+      {
+        "name": "onKeyboardChanged",
+        "type": "function",
+        "description": "Fires for all keyboard changes that have not been consumed by the browser",
+        "parameters": [
+          {
+            "type": "boolean",
+            "name": "down",
+            "description": "True when pressed, false when released"
+          },
+          {
+            "type": "integer",
+            "name": "modifiers",
+            "description": "Modifier state when change occured"
+          },
+          {
+            "type": "integer",
+            "name": "windowsKeyCode",
+            "description": "Value of key that changed"
+          }
+        ]
+      },
+      {
+        "name": "onKeyboardShortcut",
+        "type": "function",
+        "description": "Fires when on a keystroke that hasn't been consumed by the browser",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "shortcutText",
+            "description": "String representation of a keyboard shortcut"
+          },
+          {
+            "type": "boolean",
+            "name": "autoRepeat",
+            "description": "True if the shortcut is generated as a result of automatic keyboard repeat"
+          }
+        ]
+      }
+    ]
+  }
+]

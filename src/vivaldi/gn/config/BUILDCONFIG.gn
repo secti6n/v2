@@ -1,0 +1,7 @@
+declare_args() {
+  is_vivaldi = true
+}
+assert (is_vivaldi)
+
+import ("//build/config/BUILDCONFIG.gn")
+import ("//vivaldi/gn/config/product_configs.gni")

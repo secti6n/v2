@@ -1,0 +1,14 @@
+source_set("clientparts") {
+  sources = [
+    "vivaldi_content_browser_client_parts.cc",
+    "vivaldi_content_browser_client_parts.h",
+  ]
+  deps = [
+    "//base:base",
+    "//chrome/app/resources:platform_locale_settings",
+    "//components/prefs:prefs",
+    "//content/public/browser",
+    "//skia",
+    "//vivaldi/prefs",
+  ]
+}

@@ -1,0 +1,9 @@
+
+update_target("//chrome/renderer:renderer") {
+  sources += [
+    "//vivaldi/renderer/vivaldi_render_view_observer.cc",
+    "//vivaldi/renderer/vivaldi_render_view_observer.h",
+    "//vivaldi/renderer/vivaldi_render_frame_observer.cc",
+    "//vivaldi/renderer/vivaldi_render_frame_observer.h"
+  ]
+}

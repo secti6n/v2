@@ -1,0 +1,20 @@
+if (is_mac) {
+  update_target("//chrome:chrome_framework_resources") {
+    public_deps += [ "//vivaldi/vivapp:vivaldi_app" ]
+  }
+
+  update_target("//chrome:chrome_versioned_bundle_data") {
+    public_deps += [ "//vivaldi/vivapp:vivaldi_app" ]
+  }
+}
+
+update_target("//components/resources:about_credits") {
+  if (!defined(deps)) {
+    deps = []
+  }
+  deps += [ "//vivaldi/vivapp:vivaldi_app" ]
+  inputs += [
+    "//vivaldi/scripts/licenses/licenses_vivaldi.py",
+    "$root_gen_dir/vivaldi/vivapp/module_list",
+  ]
+}

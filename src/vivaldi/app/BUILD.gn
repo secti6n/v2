@@ -1,0 +1,84 @@
+import("//vivaldi/gn/config/features.gni")
+import("//vivaldi/gn/config/product.gni")
+import("//build/config/locales.gni")
+import("//build/util/process_version.gni")
+
+import("resources/vivaldi_grit.gni")
+
+source_set("app") {
+  sources = [
+    "vivaldi.rc",
+  ]
+
+  public_deps = [
+    ":resources",
+  ]
+  deps = []
+}
+
+group("resources") {
+  public_deps = [
+    ":vivaldi_native_resources",
+    ":vivaldi_native_strings",
+    ":vivaldi_unscaled_native_resources",
+    "resources",
+  ]
+}
+
+single_grit_action("vivaldi_native_strings") {
+  grit_out_dir = "$root_gen_dir/vivaldi"
+  source = "native_resources/vivaldi_native_strings.grd"
+  grit_resource_ids = "//vivaldi/app/gritsettings/resource_ids"
+  have_strings = true
+}
+
+grit("vivaldi_native_resources") {
+  output_dir = "$root_gen_dir/vivaldi"
+  resource_ids = "//vivaldi/app/gritsettings/resource_ids"
+  source = "native_resources/vivaldi_native_resources.grd"
+  outputs = exec_script(gritinfo_cmd,
+                        grit_defines + [
+                              "--outputs",
+                              ".",
+                              rebase_path(source, root_build_dir),
+                              "-f",
+                              rebase_path(resource_ids, root_build_dir),
+                            ],
+                        "list lines")
+}
+
+grit("vivaldi_unscaled_native_resources") {
+  output_dir = "$root_gen_dir/vivaldi"
+  resource_ids = "//vivaldi/app/gritsettings/resource_ids"
+  source = "native_resources/vivaldi_native_unscaled.grd"
+  outputs = exec_script(gritinfo_cmd,
+                        grit_defines + [
+                              "--outputs",
+                              ".",
+                              rebase_path(source, root_build_dir),
+                              "-f",
+                              rebase_path(resource_ids, root_build_dir),
+                            ],
+                        "list lines")
+}
+
+action("write_translation_xml_generation_script") {
+  script = "//vivaldi/app/resources/gen_write_translations_script.py"
+  inputs = [ script ]
+  outputs = [ "$root_out_dir/generate_translation_xml.py" ]
+
+  args = rebase_path(outputs, root_out_dir) + locales + vivaldi_pending_locales
+}
+
+config("vivaldi_app_config") {
+  include_dirs = ["$target_gen_dir/vivaldi"]
+}
+
+process_version("vivaldi_icon") {
+  template_file = "vivaldi_icon.h.in"
+  output = "$root_gen_dir/app/vivaldi_icon.h"
+  extra_args = [
+    "-e",
+    "VIVALDI_RELEASE_KIND=\"$VIVALDI_RELEASE_KIND\"",
+  ]
+}

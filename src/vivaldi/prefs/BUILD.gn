@@ -1,0 +1,88 @@
+import("//build/config/jumbo.gni")
+
+config("prefs_include_dirs") {
+  include_dirs=["$root_gen_dir/vivaldi"]
+}
+
+action("prefs_files_generator") {
+  prefs_definitions_json = "//vivaldi/vivapp/src/prefs_definitions.json"
+
+  vivaldi_gen_prefs_cc = "$target_gen_dir/vivaldi_gen_prefs.cc"
+  vivaldi_gen_prefs_h = "$target_gen_dir/vivaldi_gen_prefs.h"
+  vivaldi_gen_pref_enums_h = "$target_gen_dir/vivaldi_gen_pref_enums.h"
+
+  sources = [
+    prefs_definitions_json,
+  ]
+
+  outputs = [
+    vivaldi_gen_prefs_cc,
+    vivaldi_gen_prefs_h,
+    vivaldi_gen_pref_enums_h,
+  ]
+
+  script = "//vivaldi/tools/prefs_files_generator/prefs_files_generator.py"
+
+  args = [
+    "--prefs-definitions=" + rebase_path(prefs_definitions_json, root_build_dir),
+    "--prefs-names-h=" + rebase_path(vivaldi_gen_prefs_h, root_build_dir),
+    "--prefs-names-cc=" + rebase_path(vivaldi_gen_prefs_cc, root_build_dir),
+    "--prefs-enums-h=" + rebase_path(vivaldi_gen_pref_enums_h, root_build_dir),
+    "--root="+rebase_path(root_gen_dir, root_build_dir)
+  ]
+
+  all_dependent_configs = [":prefs_include_dirs"]
+}
+
+static_library("prefs") {
+  sources = [
+    "vivaldi_browser_prefs.h",
+    "vivaldi_browser_prefs.cc",
+    "vivaldi_browser_prefs_android.cc",
+    "vivaldi_browser_prefs_linux.cc",
+    "vivaldi_browser_prefs_mac.mm",
+    "vivaldi_browser_prefs_win.cc",
+  ]
+  sources += get_target_outputs(":prefs_files_generator")
+  deps = [
+    "//skia",
+    ":prefs_files_generator",
+    ":prefs_strings",
+  ]
+  if(!is_android) {
+    deps += [ "//apps:apps" ]
+  }
+}
+
+static_library("prefs_strings") {
+  sources = [
+    "vivaldi_pref_names.cc",
+    "vivaldi_pref_names.h",
+  ]
+}
+
+jumbo_static_library("browser_prefs") {
+  sources = [
+    "native_settings_observer.cc",
+    "native_settings_observer.h",
+    "native_settings_observer_delegate.h",
+    "native_settings_observer_linux.cc",
+    "native_settings_observer_linux.h",
+    "native_settings_observer_mac.h",
+    "native_settings_observer_mac.mm",
+    "native_settings_observer_win.cc",
+    "native_settings_observer_win.h",
+    "vivaldi_tab_zoom_pref.cc",
+    "vivaldi_tab_zoom_pref.h",
+  ]
+  deps = [
+    ":prefs_files_generator",
+    "//content/public/browser",
+    "//skia",
+  ]
+  if (!is_android) {
+    deps += [
+      "//vivaldi/extensions/schema:api",
+    ]
+  }
+}

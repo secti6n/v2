@@ -1,0 +1,158 @@
+import("//vivaldi/vivaldi_init_settings.gni")
+import("//build/config/chrome_build.gni")
+
+assert(is_vivaldi)
+
+import("//build/config/ui.gni")
+
+import("//vivaldi/gn/config/features.gni")
+import("//vivaldi/gn/config/product.gni")
+import("//vivaldi/gn/compile_updates.gni")
+import("//vivaldi/gn/source_updates.gni")
+
+import("//vivaldi/gn/product_updates.gni")
+import("//vivaldi/gn/deps_updates.gni")
+
+group("All") {
+  testonly = true
+
+  deps = [
+    ":vivaldi",
+    "//base:base_unittests",
+    "//cc:cc_unittests",
+    "//chrome/test:browser_tests",
+    "//chrome/test:unit_tests",
+    "//components:components_unittests",
+    "//content/shell:content_shell",
+    "//content/test:content_browsertests",
+    "//content/test:content_unittests",
+    "//crypto:crypto_unittests",
+    "//device:device_unittests",
+    "//google_apis:google_apis_unittests",
+    "//gpu:gpu_unittests",
+    "//ipc:ipc_tests",
+    "//jingle:jingle_unittests",
+    "//media:media_unittests",
+    "//media/cast:cast_unittests",
+    "//net:net_unittests",
+    "//printing:printing_unittests",
+    "//sql:sql_unittests",
+    "//third_party/cacheinvalidation:cacheinvalidation_unittests",
+    "//ui/gfx:gfx_unittests",
+    "//url:url_unittests",
+    "//vivaldi/app:write_translation_xml_generation_script",
+  ]
+  if (is_linux) {
+    deps += [
+      #"//breakpad:breakpad_unittests",
+      #"//breakpad:generate_test_dump",
+    ]
+  }
+  if (!is_android) {
+    deps += [
+      "//chrome/test/chromedriver:chromedriver_unittests",
+    ]
+  }
+  if (is_win) {
+    deps += [
+      "//chrome/installer/mini_installer",
+      "//courgette:courgette",
+      "//courgette:courgette_unittests",
+      "//sandbox/win:sbox_integration_tests",
+      "//sandbox/win:sbox_unittests",
+      "//sandbox/win:sbox_validation_tests",
+      "//vivaldi/update_notifier",
+    ]
+  } else if (!is_linux || !is_component_build) {
+    deps += [ "//chrome/installer" ]
+  }
+  if (is_mac) {
+    deps += [
+      "//third_party/ocmock",
+      "//ui/message_center:message_center_unittests",
+      "//vivaldi/installer/mac",
+    ]
+  }
+  if (is_linux) {
+    deps += [
+      "//courgette:courgette_unittests",
+      "//sandbox/linux:chrome_sandbox",
+      "//sandbox/linux:sandbox_linux_unittests",
+    ]
+    if (use_dbus) {
+      deps += [
+        "//dbus:dbus_test_server",
+        "//dbus:dbus_unittests",
+      ]
+    }
+    if (!is_component_build) {
+      deps += [
+        "//chrome/installer/linux",
+        ":linux_packages_all",
+        ":linux_crash_reporting",
+      ]
+    }
+    if (use_dbus) {
+      deps += [ "//dbus" ]
+    }
+  }
+  if (!is_android) {
+    deps += [
+      "//chrome/test:interactive_ui_tests",
+      "//chrome/test:sync_integration_tests",
+      "//ppapi:ppapi_unittests",
+    ]
+  }
+  if (use_aura) {
+    deps += [
+      "//ui/aura:aura_unittests",
+      "//ui/compositor:compositor_unittests",
+    ]
+    if (!is_chromecast) {
+      deps += [ "//ui/views:views_unittests" ]
+    }
+  }
+  if (is_win) {
+    deps += ["//vivaldi/testing:testing"]
+  }
+}
+
+group("vivaldi") {
+  deps = [
+    ":standalone",
+    "//chrome:chrome",
+  ]
+  if (is_android) {
+    deps -= [ "//chrome:chrome" ]
+    deps += [ "//chrome/android:chrome_public_apk" ]
+  }
+  if (is_mac || is_win) {
+    deps += [ "//third_party/crashpad/crashpad/handler:crashpad_handler" ]
+  }
+}
+
+copy("standalone") {
+  sources = [
+    "testdata/stp.viv",
+  ]
+  outputs = [
+    "$root_build_dir/stp.viv",
+  ]
+}
+
+if (is_linux && !is_component_build) {
+  group("linux_packages_all") {
+    deps = [ "//chrome/installer/linux" ]
+  }
+  group("linux_crash_reporting") {
+    deps = [
+    #  "//breakpad:core-2-minidump",
+    #  "//breakpad:dump_syms($host_toolchain)",
+    #  "//breakpad:microdump_stackwalk($host_toolchain)",
+    #  "//breakpad:minidump-2-core",
+    #  "//breakpad:minidump_dump($host_toolchain)",
+    #  "//breakpad:minidump_stackwalk($host_toolchain)",
+    #  "//breakpad:symupload($host_toolchain)",
+    ]
+  }
+}

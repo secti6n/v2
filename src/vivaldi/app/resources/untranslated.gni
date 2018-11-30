@@ -1,0 +1,94 @@
+import("//vivaldi/gn/config/features.gni")
+import("//build/config/locales.gni")
+
+declare_args() {
+  generate_untranslated = false
+}
+
+gritinfo_cmd = "//tools/grit/grit_info.py"
+_grit_cmd = "//tools/grit/grit.py"
+_default_grit_resource_ids = "//tools/gritsettings/resource_ids"
+_list_lang_cmd = "//vivaldi/app/list_lang_xmb_files.py"
+if (!defined(locales)) {
+  locales = []
+}
+
+template("vivaldi_extract_untranslated") {
+  assert(defined(invoker.source))
+  forward_variables_from(invoker,
+                         [
+                           "source",
+                           "original_source",
+                           "vivaldi_source",
+                           "deps",
+                         ])
+  if (!defined(original_source)) {
+    original_source = source
+  }
+  if (defined(vivaldi_source)) {
+    file_target1= get_path_info(vivaldi_source, "name")
+    file_target2= get_path_info(original_source, "name")
+    file_target = "${file_target2}.${file_target1}"
+  } else {
+    file_target= get_path_info(original_source, "name")
+  }
+
+  deps_list = []
+  _untranslated_target_prefix = "$root_build_dir/translations/$file_target"
+  idlist = "//vivaldi/vivapp/bin/gettext/ids.txt"
+
+  foreach(locale, locales + vivaldi_pending_locales) {
+    name = "${target_name}_extract_$locale"
+    deps_list += [":"+name]
+    action(name) {
+      script = "//vivaldi/app/resources/extract_translations.py"
+      inputs = [
+        idlist,
+        source,
+      ]
+      outputs = [
+        _untranslated_target_prefix+"_$locale.po"
+      ]
+      args = [
+        "--locale", locale,
+        "--vivaldi-file", file_target,
+      ]
+      if (defined(vivaldi_source)) {
+        args += [
+          "--messages",
+          rebase_path(idlist, root_build_dir),
+        ]
+      }
+      args += [
+        rebase_path(source, root_build_dir),
+        rebase_path(_untranslated_target_prefix+"_$locale.po", root_build_dir),
+      ]
+    }
+  }
+
+  name = "${target_name}_extract_all"
+  deps_list += [":"+ name]
+  action(name) {
+    script = "//vivaldi/app/resources/extract_translations.py"
+    inputs = [ source ]
+    outputs = [ _untranslated_target_prefix+".pot" ]
+    args = [
+      "--vivaldi-file", file_target,
+    ]
+    if (defined(vivaldi_source)) {
+      args += [
+        "--messages",
+        rebase_path(idlist, root_build_dir),
+      ]
+    }
+    args += [
+      rebase_path(source, root_build_dir),
+      rebase_path(_untranslated_target_prefix+".pot", root_build_dir),
+    ]
+  }
+
+  group(target_name) {
+    deps = []
+    deps = deps_list
+  }
+}

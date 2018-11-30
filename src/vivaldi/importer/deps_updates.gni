@@ -1,0 +1,20 @@
+
+update_target("//chrome:child_dependencies") {
+  public_deps += [
+    "//vivaldi/importer",
+  ]
+}
+
+update_template_instance("//chrome/browser:browser") {
+  deps += [
+    "//vivaldi/importer:browser",
+  ]
+}
+
+if (!is_android) {
+  update_target("//chrome/common/importer:interfaces") {
+    deps += [
+      "//vivaldi/importer:browser",
+    ]
+  }
+}

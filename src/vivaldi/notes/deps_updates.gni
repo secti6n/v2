@@ -1,0 +1,24 @@
+# Copyright (c) 2015-2017 Vivaldi Technologies AS. All rights reserved
+
+update_target("//chrome:browser_dependencies") {
+  public_deps += [ "//vivaldi/notes:browser" ]
+}
+
+update_target("//components/browser_sync:browser_sync") {
+  public_deps += [
+    "//vivaldi/notes",
+    #"//vivaldi/notes:browser"
+  ]
+}
+
+if (is_android) {
+  update_target("//chrome:chrome_android_core") {
+    deps += [ "//vivaldi/notes" ]
+  }
+}
+
+update_template_instance("//components:components_unittests") {
+  deps += [
+    "//vivaldi/notes:unit_tests",
+  ]
+}

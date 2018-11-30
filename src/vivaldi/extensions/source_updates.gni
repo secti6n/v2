@@ -1,0 +1,45 @@
+
+if (!is_android) {
+  update_target("//chrome/test:browser_tests") {
+    sources += [
+      "//vivaldi/extensions/api/webview/chrome_web_view_mediastate_apitest.cc",
+    ]
+  }
+}
+
+update_target("//extensions/renderer:renderer") {
+  sources += [
+    "//vivaldi/extensions/vivaldi_script_dispatcher.cpp",
+    "//vivaldi/extensions/vivaldi_script_dispatcher.h",
+  ]
+
+  deps += [ "//vivaldi/extensions:resources" ]
+}
+
+update_template_instance("//chrome/common/extensions/api:api_features") {
+  sources += [ "//vivaldi/extensions/api/_api_features.json" ]
+}
+
+update_template_instance("//chrome/common/extensions/api:permission_features") {
+  sources += [ "//vivaldi/extensions/api/_permission_features.json" ]
+}
+
+update_template_instance("//chrome/common/extensions/api:manifest_features") {
+  sources += [ "//vivaldi/extensions/api/_manifest_features.json" ]
+}
+
+update_template_instance("//extensions/browser:browser_sources") {
+  if (!defined(vivaldi_added_1)) {
+    sources += [
+      "//vivaldi/extensions/vivaldi_extension_prefs.cc",
+       "//vivaldi/extensions/api/guest_view/vivaldi_web_view_guest.cpp",
+    ]
+    deps += [
+      "//third_party/blink/public:blink_headers",
+      "//vivaldi/extensions/schema:api",
+      "//vivaldi/prefs:prefs_files_generator",
+    ]
+  }
+  vivaldi_added_1 = true
+  not_needed(["vivaldi_added_1"])
+}

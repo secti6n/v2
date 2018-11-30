@@ -1,0 +1,323 @@
+// Copyright (c) 2015-2017 Vivaldi Technologies AS. All rights reserved
+// Copyright (c) 2014 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+[
+  {
+    "namespace": "sync",
+    "description": "Use <code>vivaldi.sync</code> for sync messages.",
+    "types": [
+      {
+        "id": "SyncNotificationClientStatus",
+        "description": "Used to report whether we have a connection to the notification server.",
+        "type": "string",
+        "enum": [ "connected", "disconnected" ]
+      },
+      {
+        "id": "SyncOperationResult",
+        "description": "The current result of a sync commit or download operation. Passed from the engine when requesting status.",
+        "type": "string",
+        "enum": [ "pending", "success", "failure" ]
+      },
+      {
+        "id": "SyncToken",
+        "type": "object",
+        "description": "Information available following a successful sync login",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "The token obtained from the server"
+          },
+          "account_id": {
+            "type": "string",
+            "descirption": "The sync account id for which the token is valid"
+          }
+        }
+      },
+      {
+        "id": "SyncDataType",
+        "type": "object",
+        "description": "A structure containing the system status of a data type.",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the data type."
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "true if we want to sync this data type, otherwise false."
+          }
+        }
+      },
+      {
+        "id": "SyncStatusInfo",
+        "type": "object",
+        "description": "Contains information about the last sync cycle and the state of the sync engine",
+        "properties":{
+          "last_sync_time": {
+            "type": "number",
+            "description": "The last time a sync cycle started"
+          },
+          "last_download_updates_status": {
+            "$ref": "SyncOperationResult",
+            "description": "Whether the download updates part of the last sync cycle was successful"
+          },
+          "last_commit_status": {
+            "$ref": "SyncOperationResult",
+            "description": "Whether the commit part of the last sync cycle was successful"
+          },
+          "is_encrypting_everything": {
+            "type": "boolean",
+            "description": "Wheter the engine is encrypting all data types"
+          },
+          "has_synced": {
+            "type": "boolean",
+            "description": "Whether the first sync cycle has been completed"
+          }
+        }
+      }
+    ],
+    "functions": [
+      {
+        "name": "start",
+        "type": "function",
+        "description": "Causes sync to be started using the provided token.",
+        "parameters": [
+          {
+            "name": "token",
+            "$ref": "SyncToken"
+          }
+        ]
+      },
+      {
+        "name": "refreshToken",
+        "type": "function",
+        "description": "Indicates that the a new access token to the sync account was obtained.",
+        "parameters": [
+          {
+            "name": "token",
+            "$ref": "SyncToken"
+          }
+        ]
+      },
+      {
+        "name": "setEncryptionPassword",
+        "type": "function",
+        "description": "Sets the password to use for encryption/decryption of Sync data. If an empty password is supplied, the password supplied when logging in will be used.",
+        "parameters": [
+          {
+            "name": "password",
+            "type": "string"
+          },
+          {
+            "name": "callback",
+            "type": "function",
+            "parameters": [
+              {
+                "name": "accepted",
+                "type": "boolean",
+                "description": "Whether the password was accepted. This will be false if we have data to decrypt and the password doesn't allow to decrypt them or if we already had a password set."
+              },
+              {
+                "name": "passwordRequired",
+                "type": "boolean",
+                "description": "Whether the password is actually required. If accepted is false and this sis true, the user must be prompted again."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "isFirstSetup",
+        "type": "function",
+        "description": "Returns true if this is the initial setup of Sync. If so,setTypes must be called before any syncing occurs.",
+        "parameters": [
+          {
+            "name": "callback",
+            "type": "function",
+            "parameters": [
+              {
+                "name": "firstSetup",
+                "type": "boolean"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "isEncryptionPasswordSetUp",
+        "type": "function",
+        "description": "Returns true if an encryption password has been set up.",
+        "parameters": [
+          {
+            "name": "callback",
+            "type": "function",
+            "parameters": [
+              {
+                "name": "firstSetup",
+                "type": "boolean"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "setTypes",
+        "type": "function",
+        "description": "Sets which data types should be synced",
+        "parameters": [
+          {
+            "name": "syncEverything",
+            "type": "boolean",
+            "description": "Sets which datatypes sould be synced."
+          },
+          {
+            "name": "types",
+            "type": "array",
+            "items": {
+              "$ref": "SyncDataType"
+            },
+            "description": "List of data types to be enabled"
+          }
+        ]
+      },
+      {
+        "name": "getTypes",
+        "type": "function",
+        "description": "Sets which data types should be synced",
+        "parameters": [
+          {
+            "name": "callback",
+            "type": "function",
+            "parameters": [
+              {
+                "name": "syncEverything",
+                "type": "boolean",
+                "description": "Gets a list of datatypes that are currently synced."
+              },
+              {
+                "name": "types",
+                "type": "array",
+                "items": {
+                  "$ref": "SyncDataType"
+                },
+                "description": "List of data types to be enabled"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "getStatus",
+        "type": "function",
+        "description": "Returns informations about the status of the last sync cycle and the sync engine",
+        "parameters":[
+          {
+            "name": "callback",
+            "type": "function",
+            "parameters":[
+              {
+                "name": "Status_info",
+                "$ref": "SyncStatusInfo"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "setupComplete",
+        "type": "function",
+        "description": "Informs the backed that the user is done setting up sync",
+        "parameters": [ ]
+      },
+      {
+        "name": "logout",
+        "type": "function",
+        "description": "Indicates that the user should be logged out from sync",
+        "parameters": [ ]
+      },
+      {
+        "name": "clearData",
+        "type": "function",
+        "description": "Clear all the user's data on the server side and logs them out",
+        "parameters": [ ]
+      },
+      {
+        "name": "updateNotificationClientStatus",
+        "type": "function",
+        "description": "Tells whether we are successfully connected to the notification server",
+        "parameters": [
+          {
+            "name": "status",
+            "$ref": "SyncNotificationClientStatus"
+          }
+        ]
+      },
+      {
+        "name": "notificationReceived",
+        "type": "function",
+        "description": "Informs that we have received a notification",
+        "parameters": [
+          {
+            "name": "client_id",
+            "type": "string"
+          },
+          {
+            "name": "notification_type",
+            "type": "string"
+          },
+          {
+            "name": "version",
+            "type": "string",
+            "serialized_type": "int64"
+        }
+        ]
+      }
+    ],
+    "events": [
+      {
+        "name": "onEngineStarted",
+        "type": "function",
+        "description": "Fired when the sync engine has started.",
+        "parameters": []
+      },
+      {
+        "name": "onEngineInitFailed",
+        "type": "function",
+        "description": "Fired when the sync engine has failed to start.",
+        "parameters": []
+      },
+      {
+        "name": "onBeginSyncing",
+        "type": "function",
+        "description": "Fired when syncing starts.",
+        "parameters": []
+      },
+      {
+        "name": "onEndSyncing",
+        "type": "function",
+        "description": "Fired when syncing is done.",
+        "parameters": []
+      },
+      {
+        "name": "onEngineStopped",
+        "type": "function",
+        "description": "Fired when the user has been logged out, either from a UI action or from a server request.",
+        "parameters": []
+      },
+      {
+        "name": "onAccessTokenRequested",
+        "type": "function",
+        "description": "Fired when a new access token is required.",
+        "parameters": []
+      },
+      {
+        "name": "onEncryptionPasswordRequested",
+        "type": "function",
+        "description": "Fired when a password is required to decrypt received Sync data.",
+        "parameters": []
+      }
+    ]
+  }
+]
